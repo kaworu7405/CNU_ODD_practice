@@ -1,5 +1,5 @@
 
-<How to use>
+How to use
   
 1. cyclictest_scripts.sh에서 cyclictest with stress test할 test에 y를 입력합니다.
   
