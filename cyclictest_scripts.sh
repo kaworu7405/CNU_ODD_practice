@@ -11,7 +11,7 @@ virtual_memory_stress='y'
 io_stress='y'
 
 #stress test 시간 설정
-time=10
+time=600
 
 echo -n > test.txt
 
