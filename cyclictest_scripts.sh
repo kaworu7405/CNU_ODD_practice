@@ -11,7 +11,7 @@ virtual_memory_stress='y'
 io_stress='y'
 
 #stress test 시간 설정
-time=600
+time=10
 
 echo -n > test.txt
 
@@ -40,14 +40,14 @@ function kill_process(){
 
 #no_background
   if [ ${list[0]} = 'y' ];then
-  sudo cyclictest -a -t -n -p99 -D ${time} -h400 > output
+  sudo cyclictest -a -t -n -p99 -D ${time} -h400 -q > output
   print output no_background
   fi
 
 #hackbench
   if [ ${list[1]} = 'y' ];then
   hackbench -l 1000000 -s 1024 -P 0 &
-  sudo cyclictest -a -t -n -p99 -D ${time} -h400 > output
+  sudo cyclictest -a -t -n -p99 -D ${time} -h400 -q > output
   print output hackbench
   kill_process hackbench
 fi
@@ -55,7 +55,7 @@ fi
 #iperf
 if [ ${list[2]} = 'y' ];then
   iperf -s &
-  sudo cyclictest -a -t -n -p99 -D ${time} -h400 > output
+  sudo cyclictest -a -t -n -p99 -D ${time} -h400 -q > output
   print output iperf
   kill_process iperf
 fi
@@ -63,7 +63,7 @@ fi
 #cpu_stress
 if [ ${list[3]} = 'y' ];then
   stress --cpu 16 &
-  sudo cyclictest -a -t -n -p99 -D ${time} -h400 > output
+  sudo cyclictest -a -t -n -p99 -D ${time} -h400 -q > output
   print output cpu_stress
   kill_process stress
 fi
@@ -71,7 +71,7 @@ fi
 #memory_stress
 if [ ${list[4]} = 'y' ];then
   stress --vm 3 --vm-bytes 1024m &
-  sudo cyclictest -a -t -n -p99 -D ${time} -h400 > output
+  sudo cyclictest -a -t -n -p99 -D ${time} -h400 -q > output
   print output memory_stress
   kill_process stress
 fi
@@ -79,7 +79,7 @@ fi
 #hdd_stress
 if [ ${list[5]} = 'y' ];then
   stress --hdd 3 --hdd-bytes 1024m &
-  sudo cyclictest -a -t -n -p99 -D ${time} -h400 > output
+  sudo cyclictest -a -t -n -p99 -D ${time} -h400 -q > output
   print output hdd_stress
   kill_process stress
 fi
@@ -87,7 +87,7 @@ fi
 #virtual_memory_stress
 if [ ${list[6]} = 'y' ];then
   stress-ng -t 1200 --vm 8 --vm-bytes 80% &
-  sudo cyclictest -a -t -n -p99 -D ${time} -h400 > output
+  sudo cyclictest -a -t -n -p99 -D ${time} -h400 -q > output
   print output virtual_memory_stress
   kill_process stress
 fi
@@ -95,7 +95,7 @@ fi
 #io_stress
 if [ ${list[7]} = 'y' ];then
   stress -i 16 &
-  sudo cyclictest -a -t -n -p99 -D ${time} -h400 > output
+  sudo cyclictest -a -t -n -p99 -D ${time} -h400 -q > output
   print output io_stress
   kill_process stress
 fi
