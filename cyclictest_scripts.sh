@@ -20,7 +20,7 @@ list=(${no_background} ${hackbench} ${iperf} ${cpu_stress} ${memory_stress} ${hd
 #cyclictest의 결과로부터 max latencies와 max latency를 가져와 출력
 function print(){
   #sort -n : 숫자 정렬, tr : 치환 , Tail -n : n만큼의 라인 출력
-  str=`grep "Max Latencies" $1 | sort -n | tr " " "\n" | tail -16 | sed s/^0*//`
+  str=`grep "Max Latencies" $1 | tr " " "\n" | tail -16 | sed s/^0*//`
   echo "**cyclictest result with $2**" >> test.txt
   echo -n "Max Latencies on each cores : " >> test.txt
   echo ${str} >> test.txt
