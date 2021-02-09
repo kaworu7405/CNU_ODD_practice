@@ -18,7 +18,7 @@ list[5]="hdd_stress"
 list[6]="virtual_memory_stress"
 list[7]="io_stress"
 
-#위 가능한 백그라운드 테스트 인덱스를 이용해 background를 실행할 순서대로 배열에 저장해주세요. 숫자는 띄어쓰기로 구분합니다.
+#위 가능한 백그라운드 테스트 인덱스를 이용해 background를 실행할 순서대로 배열에 저장해주세요. 2개 이상의 경우 띄어쓰기로 구분합니다.
 tests[0]="0" #no_background
 tests[1]="1" #hackbench
 tests[2]="2" #iperf
