@@ -1,10 +1,10 @@
 #!/bin/bash
 
 #stress test 시간 설정
-time=10
+time=600
 
 #to call the cyclictest, cyclictest의 옵션을 바꾸고 싶다면 이 함수 내용을 수정!
-function call_cyclictest(){
+function fCyclictest(){
 	sudo cyclictest -a -t -n -p99 -D ${time} -h400 -q > output
 }
 
@@ -77,7 +77,7 @@ function fTest(){
 	do
 		${commands[${a}]} &
 	done
-	call_cyclictest
+	fCyclictest
 }
 
 function fKill(){
