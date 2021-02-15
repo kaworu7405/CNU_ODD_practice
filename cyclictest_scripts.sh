@@ -1,11 +1,12 @@
 #!/bin/bash
 
 #stress test 시간 설정
-time=600
+readonly TIME=600
+readonly FILENAME="test.txt"
 
 #to call the cyclictest, cyclictest의 옵션을 바꾸고 싶다면 이 함수 내용을 수정!
-function fCyclictest(){
-	sudo cyclictest -a -t -n -p99 -D ${time} -h400 -q > output
+fCyclictest(){
+  sudo cyclictest -a -t -n -p99 -D ${TIME} -h400 -q > output
 }
 
 #가능한 백그라운드 테스트 목록
@@ -40,57 +41,64 @@ commands[6]="stress-ng -t 1200 --vm 8 --vm-bytes 80%"
 commands[7]="stress -i 16"
 
 #백그라운드 kill 명령어
-kill_command[0]=""
-kill_command[1]="hackbench"
-kill_command[2]="iperf"
-kill_command[3]="stress"
-kill_command[4]="stress"
-kill_command[5]="stress"
-kill_command[6]="stress"
-kill_command[7]="stress"
+kill_commands[0]=""
+kill_commands[1]="hackbench"
+kill_commands[2]="iperf"
+kill_commands[3]="stress"
+kill_commands[4]="stress"
+kill_commands[5]="stress"
+kill_commands[6]="stress"
+kill_commands[7]="stress"
 
-echo -n > test.txt
+echo -n > ${FILENAME}
 
 #cyclictest의 결과로부터 max latencies와 max latency를 가져와 출력
-function fPrint(){
+fPrint(){
   #sort -n : 숫자 정렬, tr : 치환 , Tail -n : n만큼의 라인 출력
   str=`grep "Max Latencies" $1 | tr " " "\n" | tail -16 | sed s/^0*//`
-  echo -n "**cyclictest result with " >> test.txt
-  tmp=(${tests[$2]})
-  echo -n ${list[${tmp[0]}]} >> test.txt
-  for ((j=1; j<${#tmp[*]}; j++))
+  {
+  echo -n "**cyclictest result with "
+  local _test_names=(${tests[$2]})
+  echo -n ${list[${_test_names[0]}]}
+
+  for ((j=1; j<${#_test_names[*]}; j++))
   do
-	echo -n ", " >> test.txt
-	echo -n ${list[${tmp[$j]}]} >> test.txt
+    echo -n ", "
+    echo -n ${list[${_test_names[$j]}]}
   done
-	echo "**" >> test.txt
-  echo -n "Max Latencies on each cores : " >> test.txt
-  echo ${str} >> test.txt
-  echo -n "Max latency : " >> test.txt
-  echo "${str}"|sort -k1n|tail -1 >> test.txt
-  echo >> test.txt
+
+  echo "**"
+  echo -n "Max Latencies on each cores : "
+  echo ${str}
+  echo -n "Max latency : "
+  echo "${str}"|sort -k1n|tail -1
+  echo
+  } >> ${FILENAME}
 }
 
-function fTest(){
-	tmp1=$(echo ${tests[$1]} | tr " " "\n")
-	for a in $tmp1
-	do
-		${commands[${a}]} &
-	done
-	fCyclictest
+fTest(){
+  local _test_names=$(echo ${tests[$1]} | tr " " "\n")
+
+  for a in $_test_names
+  do
+    ${commands[${a}]} &
+  done
+
+  fCyclictest
 }
 
-function fKill(){
-	tmp2=$(echo ${tests[$1]} | tr " " "\n")
-	for k in $tmp2
-	do
-		kill -9 `ps | grep ${kill_command[${k}]} | awk '{print $1}'`
-	done
+fKill(){
+  local _test_names=$(echo ${tests[$1]} | tr " " "\n")
+
+  for k in $_test_names
+  do
+    kill -9 `ps | grep ${kill_commands[${k}]} | awk '{print $1}'`
+  done
 }
 
 for ((i=0; i<${#tests[*]}; i++))
 do
-		fTest ${i}
-		fPrint output ${i}	
-		fKill ${i}
+  fTest ${i}
+  fPrint output ${i}	
+  fKill ${i}
 done
