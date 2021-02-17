@@ -1,7 +1,7 @@
 #!/bin/bash
 
 #stress test 시간 설정
-readonly TIME=10
+readonly TIME=600
 readonly FILENAME="test.txt"
 
 #to call the cyclictest, cyclictest의 옵션을 바꾸고 싶다면 이 함수 내용을 수정!
