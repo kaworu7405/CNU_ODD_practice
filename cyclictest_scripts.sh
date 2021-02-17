@@ -1,7 +1,7 @@
 #!/bin/bash
 
 #stress test 시간 설정
-readonly TIME=600
+readonly TIME=10
 readonly FILENAME="test.txt"
 
 #to call the cyclictest, cyclictest의 옵션을 바꾸고 싶다면 이 함수 내용을 수정!
@@ -53,18 +53,18 @@ kill_commands[7]="stress"
 echo -n > ${FILENAME}
 
 #cyclictest의 결과로부터 max latencies와 max latency를 가져와 출력
-fPrint(){
+fPrintLatency(){
   #sort -n : 숫자 정렬, tr : 치환 , Tail -n : n만큼의 라인 출력
   str=`grep "Max Latencies" $1 | tr " " "\n" | tail -16 | sed s/^0*//`
   {
   echo -n "**cyclictest result with "
-  local _test_names=(${tests[$2]})
-  echo -n ${list[${_test_names[0]}]}
+  local _test_num=(${tests[$2]})
+  echo -n ${list[${_test_num[0]}]}
 
-  for ((j=1; j<${#_test_names[*]}; j++))
+  for ((j=1; j<${#_test_num[*]}; j++))
   do
     echo -n ", "
-    echo -n ${list[${_test_names[$j]}]}
+    echo -n ${list[${_test_num[$j]}]}
   done
 
   echo "**"
@@ -76,29 +76,30 @@ fPrint(){
   } >> ${FILENAME}
 }
 
-fTest(){
-  local _test_names=$(echo ${tests[$1]} | tr " " "\n")
+#background test 실행 및 cyclictest 실행
+fCyclictestWithStress(){
+  local _test_num=$(echo ${tests[$1]} | tr " " "\n")
 
-  for a in $_test_names
+  for index in $_test_num
   do
-    ${commands[${a}]} &
+    ${commands[${index}]} &
   done
 
   fCyclictest
 }
 
-fKill(){
-  local _test_names=$(echo ${tests[$1]} | tr " " "\n")
+fKillStress(){
+  local _test_num=$(echo ${tests[$1]} | tr " " "\n")
 
-  for k in $_test_names
+  for index in $_test_num
   do
-    kill -9 `ps | grep ${kill_commands[${k}]} | awk '{print $1}'`
+    kill -9 `ps | grep ${kill_commands[${index}]} | awk '{print $1}'`
   done
 }
 
 for ((i=0; i<${#tests[*]}; i++))
 do
-  fTest ${i}
-  fPrint output ${i}	
-  fKill ${i}
+  fCyclictestWithStress ${i}
+  fPrintLatency output ${i}	
+  fKillStress ${i}
 done
