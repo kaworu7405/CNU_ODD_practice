@@ -1,12 +1,73 @@
 #!/bin/bash
+#
+# cyclictest_scripts.sh
+# : Perform cyclictest with stress tests and get the latencies as a result.
+# email : 201804232@o.cnu.ac.kr
 
-#stress test 시간 설정
-readonly TIME=600
-readonly FILENAME="test.txt"
+#cyclictest 시간 및 결과 파일명 설정
+readonly CYCLICTEST_TIME=10
+readonly FILENAME="cyclictest_result.txt"
 
-#to call the cyclictest, cyclictest의 옵션을 바꾸고 싶다면 이 함수 내용을 수정!
-fCyclictest(){
-  sudo cyclictest -a -t -n -p99 -D ${TIME} -h400 -q > output
+#cyclictest의 옵션을 바꾸고 싶다면 이 함수 내용을 수정!
+f_cyclictest(){
+  sudo cyclictest -a -t -n -p99 -D ${CYCLICTEST_TIME} -h400 -q > output
+}
+
+f_print_latency(){
+  #sort -n : 숫자 정렬, tr : 치환 , Tail -n : n만큼의 라인 출력
+  local str=`grep "Max Latencies" $1 | tr " " "\n" | tail -16 | sed s/^0*//`
+  {
+  echo -n "**cyclictest result with "
+  local _test_num=(${tests[$2]})
+  local _test_name=${list[${_test_num[0]}]}
+  echo -n ${_test_name}
+
+  #백그라운드 테스트가 여러가지 일 때 ", "를 출력하기 위한 반복문
+  for ((j=1; j<${#_test_num[*]}; j++))
+  do
+    echo -n ", "
+    _test_name=${list[${_test_num[$j]}]}
+    echo -n ${_test_name}
+  done
+
+  echo "**"
+  echo -n "Max Latencies on each cores : "
+  echo ${str}
+  echo -n "Max latency : "
+  echo "${str}"|sort -k1n|tail -1
+  echo
+  } >> ${FILENAME}
+}
+
+f_cyclictest_with_stress(){
+  local _test_num=$(echo ${tests[$1]} | tr " " "\n")
+
+  for _test_index in $_test_num
+  do
+    ${background_commands[${_test_index}]} &
+  done
+
+  f_cyclictest
+}
+
+f_kill_stress(){
+  local _test_num=$(echo ${tests[$1]} | tr " " "\n")
+
+  for _test_index in $_test_num
+  do
+    kill -9 `ps | grep ${kill_commands[${_test_index}]} | awk '{print $1}'`
+  done
+}
+
+main(){
+  echo -n > ${FILENAME}
+
+  for ((i=0; i<${#tests[*]}; i++))
+  do
+    f_cyclictest_with_stress ${i}
+    f_print_latency output ${i}	
+    f_kill_stress ${i}
+  done
 }
 
 #가능한 백그라운드 테스트 목록
@@ -31,14 +92,14 @@ tests[7]="7" #io_stress
 tests[8]="3 5" #cpu_stress and hdd_stress
 
 #백그라운드 명령어 리스트
-commands[0]=""
-commands[1]="hackbench -l 1000000 -s 1024 -P 0"
-commands[2]="iperf -s"
-commands[3]="stress --cpu 16"
-commands[4]="stress --vm 3 --vm-bytes 1024m"
-commands[5]="stress --hdd 3 --hdd-bytes 1024m"
-commands[6]="stress-ng -t 1200 --vm 8 --vm-bytes 80%"
-commands[7]="stress -i 16"
+background_commands[0]=""
+background_commands[1]="hackbench -l 1000000 -s 1024 -P 0"
+background_commands[2]="iperf -s"
+background_commands[3]="stress --cpu 16"
+background_commands[4]="stress --vm 3 --vm-bytes 1024m"
+background_commands[5]="stress --hdd 3 --hdd-bytes 1024m"
+background_commands[6]="stress-ng -t 1200 --vm 8 --vm-bytes 80%"
+background_commands[7]="stress -i 16"
 
 #백그라운드 kill 명령어
 kill_commands[0]=""
@@ -50,56 +111,4 @@ kill_commands[5]="stress"
 kill_commands[6]="stress"
 kill_commands[7]="stress"
 
-echo -n > ${FILENAME}
-
-#cyclictest의 결과로부터 max latencies와 max latency를 가져와 출력
-fPrintLatency(){
-  #sort -n : 숫자 정렬, tr : 치환 , Tail -n : n만큼의 라인 출력
-  str=`grep "Max Latencies" $1 | tr " " "\n" | tail -16 | sed s/^0*//`
-  {
-  echo -n "**cyclictest result with "
-  local _test_num=(${tests[$2]})
-  echo -n ${list[${_test_num[0]}]}
-
-  for ((j=1; j<${#_test_num[*]}; j++))
-  do
-    echo -n ", "
-    echo -n ${list[${_test_num[$j]}]}
-  done
-
-  echo "**"
-  echo -n "Max Latencies on each cores : "
-  echo ${str}
-  echo -n "Max latency : "
-  echo "${str}"|sort -k1n|tail -1
-  echo
-  } >> ${FILENAME}
-}
-
-#background test 실행 및 cyclictest 실행
-fCyclictestWithStress(){
-  local _test_num=$(echo ${tests[$1]} | tr " " "\n")
-
-  for index in $_test_num
-  do
-    ${commands[${index}]} &
-  done
-
-  fCyclictest
-}
-
-fKillStress(){
-  local _test_num=$(echo ${tests[$1]} | tr " " "\n")
-
-  for index in $_test_num
-  do
-    kill -9 `ps | grep ${kill_commands[${index}]} | awk '{print $1}'`
-  done
-}
-
-for ((i=0; i<${#tests[*]}; i++))
-do
-  fCyclictestWithStress ${i}
-  fPrintLatency output ${i}	
-  fKillStress ${i}
-done
+main
