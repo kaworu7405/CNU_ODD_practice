@@ -1,7 +1,7 @@
 #!/bin/bash
 #
 # cyclictest_scripts.sh
-# : Perform cyclictest with stress tests and get the latencies as a result.
+# usage : Perform cyclictest with stress tests and get the latencies as a result.
 # email : 201804232@o.cnu.ac.kr
 
 #cyclictest 시간 및 결과 파일명 설정
