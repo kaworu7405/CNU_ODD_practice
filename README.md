@@ -1,14 +1,18 @@
 
 How to use
   
-1. cyclictest_scripts.sh에서 가능한 백그라운드 테스트 목록의 인덱스를 이용해 cyclictest with stress test할 test를 순서대로 배열에 저장해줍니다.
+1. cyclictest_scripts.sh가 있는 폴더에서 ./cyclictest_scripts.sh --help를 명령어로 입력하여 각 스트레스 테스트의 숫자를 확인합니다.
 
-2. stress test는 10분(=600s)으로 설정되어있습니다. 원하는 시간이 있다면 time 변수값을 변경합니다.
+2. ./cyclictest_scripts.sh --stress [스트레스 테스트의 숫자] 를 명령어로 입력하여 원하는 스트레스 테스트를 백그라운드로 실행하여 cyclictest 결과(latencies)를 얻을 수 있습니다.
 
-3. test.txt로 latency 결과가 나오게 되며 파일명은 FILENAME 값을 변경합니다.
+3. 스트레스 테스트의 숫자는 띄어쓰기 한 칸으로 구별됩니다.
 
-4. call_cyclictest 함수에서 cyclictest의 옵션을 바꿀 수 있습니다.
+4. 결과는 cyclictest_result.txt 파일에 출력됩니다.
 
-5. cmd상에서 cyclictest_scripts.sh가 있는 폴더에서 명령어로 ./cyclictest_scripts.sh를 입력하여 실행합니다.
+How to modify
 
-6. 모든 test가 끝나고나면 test.txt 파일에 각 test의 core 당 max latencies와 그 중에서 가장 높은 latency를 보여줍니다.
+1. stress test는 10분(=600s)으로 설정되어있습니다. 원하는 시간이 있다면 CYCLICTEST_TIME 상수값을 변경합니다.
+
+2. 결과가 출력되는 파일명은 FILENAME 값을 변경합니다.
+
+3. run_cyclictest 함수에서 cyclictest의 옵션을 바꿀 수 있습니다.
