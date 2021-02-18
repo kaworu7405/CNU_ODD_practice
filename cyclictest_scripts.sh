@@ -5,7 +5,7 @@
 # email : 201804232@o.cnu.ac.kr
 
 #cyclictest 시간 및 결과 파일명 설정
-readonly CYCLICTEST_TIME=10
+readonly CYCLICTEST_TIME=600
 readonly FILENAME="cyclictest_result.txt"
 
 #cyclictest의 옵션을 바꾸고 싶다면 이 함수 내용을 수정!
